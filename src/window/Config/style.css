@@ -1,5 +1,262 @@
+/* ============================================
+   CONFIG WINDOW STYLES
+   Transkit Desktop
+   ============================================ */
+
+/* ---------- Config Item Layout ---------- */
 .config-item {
-    margin: 10px 0;
+    margin: 12px 0;
     display: flex;
     justify-content: space-between;
+    align-items: center;
+}
+
+/* ---------- Navigation Item Styles ---------- */
+.nav-item {
+    position: relative;
+    border: none;
+    background: transparent;
+}
+
+.nav-item:focus {
+    outline: none;
+}
+
+.nav-item:focus-visible {
+    box-shadow: 0 0 0 2px var(--brand-primary);
+    border-radius: 0.75rem;
+}
+
+/* Nav item hover glow effect */
+.nav-item:hover {
+    background: rgba(14, 165, 233, 0.05);
+}
+
+.dark .nav-item:hover {
+    background: rgba(56, 189, 248, 0.05);
+}
+
+/* Active nav item background */
+.nav-item-active {
+    background: linear-gradient(135deg, rgba(14, 165, 233, 0.1) 0%, rgba(6, 182, 212, 0.05) 100%);
+}
+
+.dark .nav-item-active {
+    background: linear-gradient(135deg, rgba(56, 189, 248, 0.1) 0%, rgba(6, 182, 212, 0.05) 100%);
+}
+
+/* ---------- Sidebar Specific ---------- */
+.sidebar-logo {
+    transition: transform 0.3s cubic-bezier(0.19, 1, 0.22, 1);
+}
+
+.sidebar-logo:hover {
+    transform: scale(1.02);
+}
+
+/* ---------- Section Headers ---------- */
+.section-header {
+    font-size: 0.625rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--nextui-default-400);
+}
+
+/* ---------- Theme Toggle ---------- */
+.theme-toggle-btn {
+    transition: all 0.2s ease;
+}
+
+.theme-toggle-btn.active {
+    background: var(--gradient-primary);
+    color: white;
+    box-shadow: 0 2px 8px rgba(14, 165, 233, 0.25);
+}
+
+/* ---------- Badge Styles ---------- */
+.badge-count {
+    background: rgba(14, 165, 233, 0.12);
+    color: #0ea5e9;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    padding: 0.125rem 0.5rem;
+    border-radius: 9999px;
+}
+
+.dark .badge-count {
+    background: rgba(56, 189, 248, 0.12);
+    color: #38bdf8;
+}
+
+/* ---------- Active Indicator ---------- */
+.active-indicator {
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 3px;
+    height: 60%;
+    border-radius: 3px 0 0 3px;
+    background: linear-gradient(180deg, #0ea5e9, #06b6d4);
+}
+
+.dark .active-indicator {
+    background: linear-gradient(180deg, #38bdf8, #06b6d4);
+}
+
+/* ---------- Page Header ---------- */
+.page-header {
+    position: relative;
+}
+
+.page-header::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, var(--nextui-content3), transparent);
+}
+
+/* ---------- Content Area ---------- */
+.config-content {
+    animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ---------- Cards in Config Pages ---------- */
+.config-card {
+    background: var(--nextui-content1);
+    border: 1px solid var(--nextui-content3);
+    border-radius: 1rem;
+    padding: 1.25rem;
+    transition: all 0.25s cubic-bezier(0.19, 1, 0.22, 1);
+}
+
+.config-card:hover {
+    border-color: rgba(14, 165, 233, 0.2);
+    box-shadow: 0 4px 20px rgba(14, 165, 233, 0.06);
+}
+
+.dark .config-card {
+    background: linear-gradient(180deg, #12121a 0%, #0f0f17 100%);
+    border-color: rgba(56, 189, 248, 0.08);
+}
+
+.dark .config-card:hover {
+    border-color: rgba(56, 189, 248, 0.15);
+    box-shadow: 0 4px 24px rgba(56, 189, 248, 0.08);
+}
+
+/* ---------- Card Header ---------- */
+.config-card-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--nextui-content3);
+}
+
+.config-card-icon {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, rgba(14, 165, 233, 0.12), rgba(6, 182, 212, 0.08));
+    color: #0ea5e9;
+}
+
+.dark .config-card-icon {
+    background: linear-gradient(135deg, rgba(56, 189, 248, 0.12), rgba(6, 182, 212, 0.08));
+    color: #38bdf8;
+}
+
+.config-card-title {
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--nextui-foreground);
+}
+
+.config-card-line {
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, var(--brand-primary), transparent);
+    opacity: 0.3;
+}
+
+/* ---------- Form Elements in Config ---------- */
+.config-label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--nextui-foreground);
+    margin-bottom: 0.25rem;
+}
+
+.config-description {
+    font-size: 0.75rem;
+    color: var(--nextui-default-500);
+    margin-top: 0.125rem;
+}
+
+/* ---------- Dividers ---------- */
+.config-divider {
+    height: 1px;
+    background: var(--nextui-content3);
+    margin: 1rem 0;
+}
+
+.config-divider-dashed {
+    height: 1px;
+    border-top: 1px dashed var(--nextui-content4);
+    margin: 1rem 0;
+}
+
+/* ---------- Scrollbar Override for Config ---------- */
+.config-scroll::-webkit-scrollbar {
+    width: 4px;
+}
+
+.config-scroll::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.config-scroll::-webkit-scrollbar-thumb {
+    background: rgba(14, 165, 233, 0.2);
+    border-radius: 2px;
+}
+
+.config-scroll::-webkit-scrollbar-thumb:hover {
+    background: rgba(14, 165, 233, 0.35);
+}
+
+.dark .config-scroll::-webkit-scrollbar-thumb {
+    background: rgba(56, 189, 248, 0.2);
+}
+
+.dark .config-scroll::-webkit-scrollbar-thumb:hover {
+    background: rgba(56, 189, 248, 0.35);
+}
+
+/* ---------- Responsive Adjustments ---------- */
+@media (max-height: 600px) {
+    .nav-item {
+        padding-top: 0.5rem;
+        padding-bottom: 0.5rem;
+    }
 }

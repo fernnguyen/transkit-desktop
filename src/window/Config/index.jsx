@@ -1,7 +1,7 @@
 import { useLocation, useRoutes } from 'react-router-dom';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { appWindow } from '@tauri-apps/api/window';
-import { Card, Divider } from '@nextui-org/react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 
 import WindowControl from '../../components/WindowControl';
@@ -10,6 +10,62 @@ import { osType } from '../../utils/env';
 import { useConfig } from '../../hooks';
 import routes from './routes';
 import './style.css';
+
+// Page transition variants
+const pageVariants = {
+    initial: {
+        opacity: 0,
+        y: 8,
+    },
+    animate: {
+        opacity: 1,
+        y: 0,
+        transition: {
+            duration: 0.3,
+            ease: [0.19, 1, 0.22, 1],
+        },
+    },
+    exit: {
+        opacity: 0,
+        y: -8,
+        transition: {
+            duration: 0.2,
+        },
+    },
+};
+
+// Logo Component
+function Logo() {
+    return (
+        <div className="flex items-center gap-3 px-4" data-tauri-drag-region="true">
+            <div className="relative">
+                {/* Logo Icon with gradient background */}
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-500 to-accent-cyan flex items-center justify-center shadow-glow-sm">
+                    <svg
+                        width="24"
+                        height="24"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        className="text-white"
+                    >
+                        <path
+                            d="M12.87 15.07l-2.54-2.51.03-.03A17.52 17.52 0 0014.07 6H17V4h-7V2H8v2H1v2h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11.76-2.04zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2l-4.5-12zm-2.62 7l1.62-4.33L19.12 17h-3.24z"
+                            fill="currentColor"
+                        />
+                    </svg>
+                </div>
+            </div>
+            <div className="flex flex-col">
+                <span className="text-base font-heading font-semibold text-gradient">
+                    Transkit
+                </span>
+                <span className="text-[10px] text-default-400 dark:text-default-500">
+                    Desktop
+                </span>
+            </div>
+        </div>
+    );
+}
 
 export default function Config() {
     const [transparent] = useConfig('transparent', true);
@@ -24,58 +80,86 @@ export default function Config() {
     }, []);
 
     return (
-        <>
-            <Card
-                shadow='none'
-                className={`${
-                    transparent ? 'bg-background/90' : 'bg-content1'
-                } float-left w-[230px] h-screen rounded-none ${
-                    osType === 'Linux' && 'rounded-l-[10px] border-1'
-                } border-r-1 border-default-100 select-none cursor-default`}
+        <div className="flex h-screen">
+            {/* Sidebar */}
+            <aside
+                className={`
+                    w-[240px] h-screen flex flex-col
+                    ${transparent ? 'bg-background/80 backdrop-blur-lg' : 'bg-content1'}
+                    border-r border-content3 dark:border-content3
+                    ${osType === 'Linux' && 'rounded-l-[10px] border-l border-t border-b'}
+                    select-none
+                `}
             >
-                <div className='h-[35px] p-[5px]'>
-                    <div
-                        className='w-full h-full'
-                        data-tauri-drag-region='true'
-                    />
-                </div>
-                <div className='p-[5px]'>
-                    <div data-tauri-drag-region='true'>
-                        <img
-                            alt='pot logo'
-                            src='icon.svg'
-                            className='h-[60px] w-[60px] m-auto mb-[30px]'
-                            draggable={false}
-                        />
-                    </div>
-                </div>
-                <SideBar />
-            </Card>
-            <div
-                className={`bg-background ml-[230px] h-screen select-none cursor-default ${
-                    osType === 'Linux' && 'rounded-r-[10px] border-1 border-l-0 border-default-100'
-                }`}
-            >
+                {/* Drag Region */}
                 <div
-                    data-tauri-drag-region='true'
-                    className='top-[5px] left-[235px] right-[5px] h-[30px] fixed'
+                    className="h-[12px] w-full shrink-0"
+                    data-tauri-drag-region="true"
                 />
-                <div className='h-[35px] flex justify-between'>
-                    <div className='flex'>
-                        <h2 className='m-auto ml-[10px]'>{t(`config.${location.pathname.slice(1)}.title`)}</h2>
+
+                {/* Logo Area */}
+                <div className="py-4 shrink-0">
+                    <Logo />
+                </div>
+
+                {/* Navigation */}
+                <div className="flex-1 overflow-hidden">
+                    <SideBar />
+                </div>
+            </aside>
+
+            {/* Main Content */}
+            <main
+                className={`
+                    flex-1 h-screen flex flex-col bg-background
+                    ${osType === 'Linux' && 'rounded-r-[10px] border-r border-t border-b border-content3'}
+                    select-none
+                `}
+            >
+                {/* Header */}
+                <header className="h-[52px] shrink-0 flex items-center justify-between px-4 border-b border-content3 dark:border-content3">
+                    {/* Drag region for header */}
+                    <div
+                        data-tauri-drag-region="true"
+                        className="absolute top-0 left-[240px] right-0 h-[12px]"
+                    />
+
+                    {/* Page Title */}
+                    <div className="flex items-center gap-3">
+                        <h1 className="text-[16px] font-heading font-semibold text-foreground">
+                            {t(`config.${location.pathname.slice(1)}.title`)}
+                        </h1>
                     </div>
 
-                    <div className='flex'>{osType !== 'Darwin' && <WindowControl />}</div>
-                </div>
-                <Divider />
+                    {/* Window Controls (non-macOS) */}
+                    {osType !== 'Darwin' && (
+                        <div className="flex items-center">
+                            <WindowControl />
+                        </div>
+                    )}
+                </header>
+
+                {/* Page Content with Animation */}
                 <div
-                    className={`p-[10px] overflow-y-auto ${
-                        osType === 'Linux' ? 'h-[calc(100vh-38px)]' : 'h-[calc(100vh-36px)]'
-                    }`}
+                    className={`
+                        flex-1 overflow-y-auto p-4
+                        ${osType === 'Linux' ? 'h-[calc(100vh-54px)]' : 'h-[calc(100vh-52px)]'}
+                    `}
                 >
-                    {page}
+                    <AnimatePresence mode="wait">
+                        <motion.div
+                            key={location.pathname}
+                            variants={pageVariants}
+                            initial="initial"
+                            animate="animate"
+                            exit="exit"
+                            className="h-full"
+                        >
+                            {page}
+                        </motion.div>
+                    </AnimatePresence>
                 </div>
-            </div>
-        </>
+            </main>
+        </div>
     );
 }

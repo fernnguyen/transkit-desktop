@@ -25,6 +25,9 @@ export default function SelectModal(props) {
                                     <div key={x}>
                                         <Button
                                             fullWidth
+                                            variant='flat'
+                                            color='default'
+                                            className='justify-start'
                                             onPress={() => {
                                                 setCurrentConfigKey(createServiceInstanceKey(x));
                                                 onConfigOpen();
@@ -32,13 +35,12 @@ export default function SelectModal(props) {
                                             startContent={
                                                 <img
                                                     src={builtinServices[x].info.icon}
-                                                    className='h-[24px] w-[24px] my-auto'
+                                                    className='h-[24px] w-[24px]'
+                                                    alt=''
                                                 />
                                             }
                                         >
-                                            <div className='w-full'>
-                                                {t(`services.translate.${builtinServices[x].info.name}.title`)}
-                                            </div>
+                                            {t(`services.translate.${builtinServices[x].info.name}.title`)}
                                         </Button>
                                     </div>
                                 );

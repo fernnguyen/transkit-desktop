@@ -47,9 +47,10 @@ export default function General() {
     const toastStyle = useToastStyle();
 
     const languageName = {
+        en: 'English',
+        vi: 'Tiếng Việt',
         zh_cn: '简体中文',
         zh_tw: '繁體中文',
-        en: 'English',
         ja: '日本語',
         ko: '한국어',
         fr: 'Français',
@@ -171,6 +172,18 @@ export default function General() {
                                     }}
                                 >
                                     <DropdownItem
+                                        key='en'
+                                        startContent={<span className={`fi fi-${LanguageFlag.en}`} />}
+                                    >
+                                        English
+                                    </DropdownItem>
+                                    <DropdownItem
+                                        key='vi'
+                                        startContent={<span className={`fi fi-${LanguageFlag.vi}`} />}
+                                    >
+                                        Tiếng Việt
+                                    </DropdownItem>
+                                    <DropdownItem
                                         key='zh_cn'
                                         startContent={<span className={`fi fi-${LanguageFlag.zh_cn}`} />}
                                     >
@@ -181,12 +194,6 @@ export default function General() {
                                         startContent={<span className={`fi fi-${LanguageFlag.zh_cn}`} />}
                                     >
                                         繁體中文
-                                    </DropdownItem>
-                                    <DropdownItem
-                                        key='en'
-                                        startContent={<span className={`fi fi-${LanguageFlag.en}`} />}
-                                    >
-                                        English
                                     </DropdownItem>
                                     <DropdownItem
                                         key='ja'
