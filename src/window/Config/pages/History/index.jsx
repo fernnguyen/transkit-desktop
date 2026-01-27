@@ -198,7 +198,14 @@ export default function History() {
                                                     : 'w-[calc((100vw-287px-26px-60px-140px)*0.5)]'
                                             } text-ellipsis overflow-hidden`}
                                         >
-                                            {item.result}
+                                            {(() => {
+                                                try {
+                                                    const parsed = JSON.parse(item.result);
+                                                    return parsed.translation || item.result;
+                                                } catch (e) {
+                                                    return item.result;
+                                                }
+                                            })()}
                                         </p>
                                     </TableCell>
                                     <TableCell>

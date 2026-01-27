@@ -203,7 +203,7 @@ export default function TargetArea(props) {
                                 detectLanguage,
                                 newTargetLanguage,
                                 translateServiceName,
-                                typeof v === 'string' ? v.trim() : v
+                                typeof v === 'string' ? v.trim() : JSON.stringify(v)
                             );
                         }
                         if (index === 0 && !clipboardMonitor) {
@@ -276,7 +276,7 @@ export default function TargetArea(props) {
                                     detectLanguage,
                                     newTargetLanguage,
                                     translateServiceName,
-                                    typeof v === 'string' ? v.trim() : v
+                                    typeof v === 'string' ? v.trim() : JSON.stringify(v)
                                 );
                             }
                             if (index === 0 && !clipboardMonitor) {
@@ -340,13 +340,14 @@ export default function TargetArea(props) {
     // handle tts speak
     const handleSpeak = async () => {
         const instanceKey = ttsServiceList[0];
+        const textToSpeak = typeof result === 'string' ? result : result.translation || '';
         if (getServiceSouceType(instanceKey) === ServiceSourceType.PLUGIN) {
             const pluginConfig = serviceInstanceConfigMap[instanceKey];
             if (!(targetLanguage in ttsPluginInfo.language)) {
                 throw new Error('Language not supported');
             }
             let [func, utils] = await invoke_plugin('tts', getServiceName(instanceKey));
-            let data = await func(result, ttsPluginInfo.language[targetLanguage], {
+            let data = await func(textToSpeak, ttsPluginInfo.language[targetLanguage], {
                 config: pluginConfig,
                 utils,
             });
@@ -357,7 +358,7 @@ export default function TargetArea(props) {
             }
             const instanceConfig = serviceInstanceConfigMap[instanceKey];
             let data = await builtinTtsServices[getServiceName(instanceKey)].tts(
-                result,
+                textToSpeak,
                 builtinTtsServices[getServiceName(instanceKey)].Language[targetLanguage],
                 {
                     config: instanceConfig,
@@ -388,7 +389,7 @@ export default function TargetArea(props) {
                     isIconOnly
                     variant='light'
                     size='sm'
-                    isDisabled={typeof result !== 'string' || result === ''}
+                    isDisabled={!result || (typeof result === 'string' && result === '')}
                     className='h-[26px] w-[26px] min-w-0 bg-transparent'
                     onPress={() => {
                         handleSpeak().catch((e) => {
@@ -405,10 +406,11 @@ export default function TargetArea(props) {
                     isIconOnly
                     variant='light'
                     size='sm'
-                    isDisabled={typeof result !== 'string' || result === ''}
+                    isDisabled={!result || (typeof result === 'string' && result === '')}
                     className='h-[26px] w-[26px] min-w-0 bg-transparent'
                     onPress={() => {
-                        writeText(result);
+                        const textToCopy = typeof result === 'string' ? result : result.translation || '';
+                        writeText(textToCopy);
                     }}
                 >
                     <MdContentCopy className='text-[16px]' />
@@ -420,7 +422,7 @@ export default function TargetArea(props) {
                     isIconOnly
                     variant='light'
                     size='sm'
-                    isDisabled={typeof result !== 'string' || result === ''}
+                    isDisabled={!result || (typeof result === 'string' && result === '')}
                     className='h-[26px] w-[26px] min-w-0 bg-transparent'
                     onPress={async () => {
                         setError('');
@@ -457,20 +459,21 @@ export default function TargetArea(props) {
                                     pluginInfo.language[newTargetLanguage],
                                     {
                                         config: instanceConfig,
-                                        detect: detectLanguage,
-                                        setResult: (v) => {
-                                            setResult(v);
-                                            setHideOnce(false);
-                                        },
-                                        utils,
+                                    detect: detectLanguage,
+                                    setResult: (v) => {
+                                        setResult(v);
+                                        setHideOnce(false);
+                                    },
+                                    utils,
+                                }
+                            ).then(
+                                (v) => {
+                                    const currentResult = typeof result === 'string' ? result : result.translation || '';
+                                    if (v === currentResult) {
+                                        setResult(v + ' ');
+                                    } else {
+                                        setResult(typeof v === 'string' ? v.trim() : v);
                                     }
-                                ).then(
-                                    (v) => {
-                                        if (v === result) {
-                                            setResult(v + ' ');
-                                        } else {
-                                            setResult(v.trim());
-                                        }
                                         setIsLoading(false);
                                         if (v !== '') {
                                             setHideOnce(false);
@@ -513,10 +516,11 @@ export default function TargetArea(props) {
                                     )
                                     .then(
                                         (v) => {
-                                            if (v === result) {
+                                            const currentResult = typeof result === 'string' ? result : result.translation || '';
+                                            if (v === currentResult) {
                                                 setResult(v + ' ');
                                             } else {
-                                                setResult(v.trim());
+                                                setResult(typeof v === 'string' ? v.trim() : v);
                                             }
                                             setIsLoading(false);
                                             if (v !== '') {
@@ -655,27 +659,40 @@ export default function TargetArea(props) {
                             />
                         ) : (
                             <div>
+                                {result['translation'] && (
+                                    <div className='mb-4'>
+                                        <span 
+                                            className='font-bold select-text'
+                                            style={{ fontSize: `${appFontSize}px` }}
+                                        >
+                                            {result['translation']}
+                                        </span>
+                                    </div>
+                                )}
                                 {result['pronunciations'] &&
                                     result['pronunciations'].map((pronunciation) => {
                                         return (
-                                            <div key={nanoid()}>
+                                            <div key={nanoid()} className='mb-2'>
                                                 {pronunciation['region'] && (
                                                     <span
-                                                        className={`text-[${appFontSize}px] mr-[12px] text-default-500`}
+                                                        className='mr-[12px] text-default-500'
+                                                        style={{ fontSize: `${appFontSize - 2}px` }}
                                                     >
                                                         {pronunciation['region']}
                                                     </span>
                                                 )}
                                                 {pronunciation['symbol'] && (
                                                     <span
-                                                        className={`text-[${appFontSize}px] mr-[12px] text-default-500`}
+                                                        className='mr-[12px] text-default-500'
+                                                        style={{ fontSize: `${appFontSize - 2}px` }}
                                                     >
                                                         {pronunciation['symbol']}
                                                     </span>
                                                 )}
                                                 {pronunciation['voice'] && pronunciation['voice'] !== '' && (
                                                     <HiOutlineVolumeUp
-                                                        className={`text-[${appFontSize}px] inline-block my-auto cursor-pointer`}
+                                                        className='inline-block my-auto cursor-pointer'
+                                                        style={{ fontSize: `${appFontSize - 2}px` }}
                                                         onClick={() => {
                                                             speak(pronunciation['voice']);
                                                         }}
@@ -687,36 +704,40 @@ export default function TargetArea(props) {
                                 {result['explanations'] &&
                                     result['explanations'].map((explanations) => {
                                         return (
-                                            <div key={nanoid()}>
-                                                {explanations['explains'] &&
-                                                    explanations['explains'].map((explain, index) => {
-                                                        return (
-                                                            <span key={nanoid()}>
-                                                                {index === 0 ? (
-                                                                    <>
-                                                                        <span
-                                                                            className={`text-[${appFontSize - 2}px] text-default-500 mr-[12px]`}
-                                                                        >
-                                                                            {explanations['trait']}
-                                                                        </span>
-                                                                        <span
-                                                                            className={`font-bold text-[${appFontSize}px] select-text`}
-                                                                        >
-                                                                            {explain}
-                                                                        </span>
-                                                                        <br />
-                                                                    </>
-                                                                ) : (
-                                                                    <span
-                                                                        className={`text-[${appFontSize - 2}px] text-default-500 select-text mr-1`}
-                                                                        key={nanoid()}
+                                            <div key={nanoid()} className='mb-4'>
+                                                <div 
+                                                    className='text-primary font-medium mb-1 italic'
+                                                    style={{ fontSize: `${appFontSize - 3}px` }}
+                                                >
+                                                    {explanations['trait']}
+                                                </div>
+                                                <div className='flex flex-col gap-2'>
+                                                    {explanations['explains'] &&
+                                                        explanations['explains'].map((explain) => {
+                                                            return (
+                                                                <div key={nanoid()} className='pl-2 border-l-2 border-default-100'>
+                                                                    <div 
+                                                                        className='font-bold select-text mb-1'
+                                                                        style={{ fontSize: `${appFontSize - 1}px` }}
                                                                     >
-                                                                        {explain}
-                                                                    </span>
-                                                                )}
-                                                            </span>
-                                                        );
-                                                    })}
+                                                                        {explain.word}
+                                                                    </div>
+                                                                    {explain.synonyms && explain.synonyms.length > 0 && (
+                                                                        <div className='flex flex-wrap gap-1'>
+                                                                            {explain.synonyms.map((synonym) => (
+                                                                                <span 
+                                                                                    key={nanoid()}
+                                                                                    className='px-1.5 py-0.5 rounded bg-default-100 text-default-500 text-[10px]'
+                                                                                >
+                                                                                    {synonym}
+                                                                                </span>
+                                                                            ))}
+                                                                        </div>
+                                                                    )}
+                                                                </div>
+                                                            );
+                                                        })}
+                                                </div>
                                             </div>
                                         );
                                     })}
@@ -725,7 +746,10 @@ export default function TargetArea(props) {
                                     result['associations'].map((association) => {
                                         return (
                                             <div key={nanoid()}>
-                                                <span className={`text-[${appFontSize}px] text-default-500`}>
+                                                <span 
+                                                    className='text-default-500'
+                                                    style={{ fontSize: `${appFontSize}px` }}
+                                                >
                                                     {association}
                                                 </span>
                                             </div>
@@ -735,13 +759,17 @@ export default function TargetArea(props) {
                                     result['sentence'].map((sentence, index) => {
                                         return (
                                             <div key={nanoid()}>
-                                                <span className={`text-[${appFontSize - 2}px] mr-[12px]`}>
+                                                <span 
+                                                    className='mr-[12px]'
+                                                    style={{ fontSize: `${appFontSize - 2}px` }}
+                                                >
                                                     {index + 1}.
                                                 </span>
                                                 <>
                                                     {sentence['source'] && (
                                                         <span
-                                                            className={`text-[${appFontSize}px] select-text`}
+                                                            className='select-text'
+                                                            style={{ fontSize: `${appFontSize}px` }}
                                                             dangerouslySetInnerHTML={{
                                                                 __html: sentence['source'],
                                                             }}
@@ -751,7 +779,8 @@ export default function TargetArea(props) {
                                                 <>
                                                     {sentence['target'] && (
                                                         <div
-                                                            className={`text-[${appFontSize}px] select-text text-default-500`}
+                                                            className='select-text text-default-500'
+                                                            style={{ fontSize: `${appFontSize}px` }}
                                                             dangerouslySetInnerHTML={{
                                                                 __html: sentence['target'],
                                                             }}
@@ -768,7 +797,8 @@ export default function TargetArea(props) {
                                 return (
                                     <p
                                         key={v}
-                                        className={`text-[${appFontSize}px] text-red-500`}
+                                        className='text-red-500'
+                                        style={{ fontSize: `${appFontSize}px` }}
                                     >
                                         {v}
                                     </p>

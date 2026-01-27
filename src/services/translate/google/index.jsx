@@ -36,7 +36,27 @@ export async function translate(text, from, to, options = {}) {
         let result = res.data;
         // 词典模式
         if (result[1]) {
-            let target = { pronunciations: [], explanations: [], associations: [], sentence: [] };
+            let target = {
+                translation: '',
+                pronunciations: [],
+                explanations: [],
+                associations: [],
+                sentence: [],
+            };
+
+            // Main translation
+            try {
+                let mainTranslation = '';
+                for (let r of result[0]) {
+                    if (r && r[0]) {
+                        mainTranslation = mainTranslation + r[0];
+                    }
+                }
+                target.translation = mainTranslation.trim();
+            } catch (e) {
+                // Ignore main translation errors
+            }
+
             // 发音 - Safe access with optional chaining
             try {
                 if (result[0]?.[1]?.[3]) {
@@ -49,10 +69,16 @@ export async function translate(text, from, to, options = {}) {
             try {
                 for (let i of result[1]) {
                     if (i && i[0] && i[2]) {
+                        // i[0] is part of speech (e.g., "tính từ")
+                        // i[2] is list of entries
+                        // Each entry in i[2] is [word, [synonyms], ...]
                         target.explanations.push({
                             trait: i[0],
                             explains: i[2].map((x) => {
-                                return x[0];
+                                return {
+                                    word: x[0],
+                                    synonyms: x[1] || [],
+                                };
                             }),
                         });
                     }
