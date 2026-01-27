@@ -370,7 +370,7 @@ export default function SourceArea(props) {
                 className='bg-content1 rounded-[10px] mt-[1px] pb-0'
             >
                 <Toaster />
-                <CardBody className='bg-content1 p-[12px] pb-0 max-h-[40vh] overflow-y-auto'>
+                <CardBody className='bg-content1 p-[12px] pb-0 max-h-[600px] overflow-y-auto'>
                     <textarea
                         autoFocus
                         ref={textAreaRef}

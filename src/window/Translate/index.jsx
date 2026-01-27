@@ -232,7 +232,7 @@ export default function Translate() {
         collectionServiceInstanceList,
     ]);
 
-    // Auto-resize window based on content height
+    // Auto-resize window based on content height and width
     useEffect(() => {
         if (!contentRef.current) return;
 
@@ -244,22 +244,39 @@ export default function Translate() {
                 await new Promise(resolve => setTimeout(resolve, 100));
 
                 const contentHeight = contentRef.current.offsetHeight;
+                const contentWidth = contentRef.current.scrollWidth;
                 const headerHeight = 32;
-                const minHeight = 80;
-                const maxHeight = 700;
 
-                // Calculate desired height
+                // Get monitor size for responsive max values
+                const monitor = await currentMonitor();
+                const monitorHeight = monitor?.size?.height || 1080;
+                const monitorWidth = monitor?.size?.width || 1920;
+                const factor = monitor?.scaleFactor || 1;
+
+                // Calculate responsive max sizes - generous limits for long content
+                // 85% of monitor height, 75% of monitor width
+                const maxHeight = Math.min(1200, Math.floor((monitorHeight / factor) * 0.85));
+                const minHeight = 120;
+
+                // Dynamic width based on content - wider for better readability
+                const minWidth = 500;
+                const maxWidth = Math.min(1200, Math.floor((monitorWidth / factor) * 0.75));
+
+                // Calculate desired dimensions
                 let desiredHeight = Math.min(Math.max(contentHeight + headerHeight, minHeight), maxHeight);
+                let desiredWidth = Math.min(Math.max(contentWidth + 20, minWidth), maxWidth);
 
                 // Get current size
                 const currentSize = await appWindow.outerSize();
-                const monitor = await currentMonitor();
-                const factor = monitor?.scaleFactor || 1;
                 const logicalSize = currentSize.toLogical(factor);
 
-                // Resize if needed
-                if (Math.abs(logicalSize.height - desiredHeight) > 15) {
-                    await appWindow.setSize(new LogicalSize(logicalSize.width, desiredHeight));
+                // Resize if needed (with threshold to avoid micro-adjustments)
+                const needsResize =
+                    Math.abs(logicalSize.height - desiredHeight) > 15 ||
+                    Math.abs(logicalSize.width - desiredWidth) > 20;
+
+                if (needsResize) {
+                    await appWindow.setSize(new LogicalSize(desiredWidth, desiredHeight));
                 }
             } catch (error) {
                 console.error('Failed to resize window:', error);
@@ -472,8 +489,12 @@ export default function Translate() {
                                             <Button
                                                 key={serviceInstanceKey}
                                                 size='sm'
-                                                variant={isActive ? 'flat' : 'light'}
-                                                className={`h-[28px] min-w-[32px] px-1.5 ${isActive ? 'bg-primary/20 border-1 border-primary/50' : ''}`}
+                                                variant='light'
+                                                className={`h-[28px] min-w-[32px] px-1.5 ${
+                                                    isActive
+                                                        ? 'border-2 border-primary shadow-sm'
+                                                        : 'border-1 border-transparent hover:border-default-300'
+                                                }`}
                                                 onPress={() => {
                                                     // Switch active provider
                                                     const items = Array.from(translateServiceInstanceList);

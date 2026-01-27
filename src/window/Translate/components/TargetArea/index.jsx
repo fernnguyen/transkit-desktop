@@ -635,13 +635,13 @@ export default function TargetArea(props) {
     return (
         <Card
             shadow='none'
-            className='rounded-[10px] max-w-[800px] w-full p-0'
+            className='rounded-[10px] w-full p-0'
         >
             <Toaster />
             <animated.div style={{ ...springs }}>
                 <div ref={boundRef}>
-                    {/* result content */}
-                    <CardBody className={`p-[8px] ${hide && 'h-0 p-0'}`}>
+                    {/* result content with dynamic max height and scrollbar */}
+                    <CardBody className={`p-[8px] ${hide ? 'h-0 p-0' : 'max-h-[800px] overflow-y-auto'}`}>
                         {isLoading && (!result || result === '') ? (
                             <div className='flex justify-center items-center py-4 text-default-400 text-sm select-none'>
                                 {t('translate.loading')}
@@ -649,7 +649,7 @@ export default function TargetArea(props) {
                         ) : typeof result === 'string' ? (
                             <textarea
                                 ref={textAreaRef}
-                                className={`text-[14px] h-0 resize-none bg-transparent select-text outline-none`}
+                                className={`text-[14px] h-0 resize-none bg-transparent select-text outline-none w-full`}
                                 readOnly
                                 value={result}
                             />
