@@ -123,6 +123,7 @@
                 "remember_window_size": "Nhớ kích thước cửa sổ",
                 "close_on_blur": "Đóng cửa sổ khi click bên ngoài",
                 "always_on_top": "Luôn ở trên cùng",
+                "fixed_providers": "Luôn hiển thị nhà cung cấp (Dịch nhanh)",
                 "hide_source": "Ẩn vùng nguồn",
                 "hide_language": "Ẩn vùng ngôn ngữ",
                 "hide_window": "Ẩn cửa sổ dịch",
@@ -459,7 +460,9 @@
             "retry": "Thử lại",
             "delete_newline": "Xóa xuống dòng",
             "translate_back": "Dịch ngược lại ngôn ngữ gốc",
-            "loading": "Đang dịch..."
+            "loading": "Đang dịch...",
+            "show_other_translations": "Xem các bản dịch khác",
+            "hide_other_translations": "Ẩn các bản dịch khác"
         },
         "recognize": {
             "recognize": "Nhận dạng",

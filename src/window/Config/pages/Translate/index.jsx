@@ -32,6 +32,7 @@ export default function Translate() {
     const [hideWindow, setHideWindow] = useConfig('translate_hide_window', false);
     const [closeOnBlur, setCloseOnBlur] = useConfig('translate_close_on_blur', true);
     const [alwaysOnTop, setAlwaysOnTop] = useConfig('translate_always_on_top', false);
+    const [fixedProviders, setFixedProviders] = useConfig('selection_translate_fixed_providers', false);
     const { t } = useTranslation();
 
     return (
@@ -291,6 +292,17 @@ export default function Translate() {
                                 isSelected={alwaysOnTop}
                                 onValueChange={(v) => {
                                     setAlwaysOnTop(v);
+                                }}
+                            />
+                        )}
+                    </div>
+                    <div className='config-item'>
+                        <h3 className='my-auto mx-0'>{t('config.translate.fixed_providers')}</h3>
+                        {fixedProviders !== null && (
+                            <Switch
+                                isSelected={fixedProviders}
+                                onValueChange={(v) => {
+                                    setFixedProviders(v);
                                 }}
                             />
                         )}

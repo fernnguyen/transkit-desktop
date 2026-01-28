@@ -113,6 +113,7 @@
                 "remember_window_size": "記住視窗大小",
                 "close_on_blur": "失去焦點時關閉視窗",
                 "always_on_top": "視窗始終置頂",
+                "fixed_providers": "始終顯示服務提供者（快速翻譯）",
                 "hide_source": "隱藏原文",
                 "hide_language": "隱藏語言區域",
                 "hide_window": "隱藏翻譯視窗",
@@ -455,7 +456,10 @@
             "copy": "複製",
             "retry": "重試",
             "delete_newline": "刪除換行",
-            "translate_back": "翻譯回原文"
+            "translate_back": "翻譯回原文",
+            "loading": "翻譯中...",
+            "show_other_translations": "查看其他翻譯",
+            "hide_other_translations": "隱藏其他翻譯"
         },
         "recognize": {
             "recognize": "辨識",

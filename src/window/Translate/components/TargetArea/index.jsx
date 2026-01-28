@@ -11,7 +11,7 @@ import {
     DropdownTrigger,
     Tooltip,
 } from '@nextui-org/react';
-import { BiCollapseVertical, BiExpandVertical } from 'react-icons/bi';
+import { BiCollapseVertical, BiExpandVertical, BiChevronDown, BiChevronUp } from 'react-icons/bi';
 import { BaseDirectory, readTextFile } from '@tauri-apps/api/fs';
 import { sendNotification } from '@tauri-apps/api/notification';
 import React, { useEffect, useState, useRef, useMemo } from 'react';
@@ -34,7 +34,7 @@ import useMeasure from 'react-use-measure';
 import * as builtinCollectionServices from '../../../../services/collection';
 import { sourceLanguageAtom, targetLanguageAtom } from '../LanguageArea';
 import { useConfig, useToastStyle, useVoice } from '../../../../hooks';
-import { sourceTextAtom, detectLanguageAtom } from '../SourceArea';
+import { sourceTextAtom, detectLanguageAtom, windowTypeAtom } from '../SourceArea';
 import { invoke_plugin } from '../../../../utils/invoke_plugin';
 import * as builtinServices from '../../../../services/translate';
 import * as builtinTtsServices from '../../../../services/tts';
@@ -79,7 +79,9 @@ export default function TargetArea(props) {
     const [clipboardMonitor] = useConfig('clipboard_monitor', false);
 
     const detectLanguage = useAtomValue(detectLanguageAtom);
+    const windowType = useAtomValue(windowTypeAtom);
     const [ttsPluginInfo, setTtsPluginInfo] = useState();
+    const [showDetailedTranslations, setShowDetailedTranslations] = useState(false);
     const { t } = useTranslation();
     const textAreaRef = useRef();
     const toastStyle = useToastStyle();
@@ -96,6 +98,7 @@ export default function TargetArea(props) {
     useEffect(() => {
         setResult('');
         setError('');
+        setShowDetailedTranslations(false);
         if (
             sourceText.trim() !== '' &&
             sourceLanguage &&
@@ -661,7 +664,7 @@ export default function TargetArea(props) {
                             <div>
                                 {result['translation'] && (
                                     <div className='mb-4'>
-                                        <span 
+                                        <span
                                             className='font-bold select-text'
                                             style={{ fontSize: `${appFontSize}px` }}
                                         >
@@ -669,7 +672,25 @@ export default function TargetArea(props) {
                                         </span>
                                     </div>
                                 )}
-                                {result['pronunciations'] &&
+                                {/* Show detailed translations toggle button for quick translate mode */}
+                                {windowType === '[SELECTION_TRANSLATE]' &&
+                                 (result['pronunciations'] || result['explanations'] || result['associations'] || result['sentence']) && (
+                                    <div className='mb-3 flex items-center'>
+                                        <button
+                                            onClick={() => setShowDetailedTranslations(!showDetailedTranslations)}
+                                            className='flex items-center gap-1 text-xs text-primary hover:text-primary-600 transition-colors cursor-pointer bg-transparent border-none p-0'
+                                        >
+                                            <span>{showDetailedTranslations ? t('translate.hide_other_translations') : t('translate.show_other_translations')}</span>
+                                            {showDetailedTranslations ? (
+                                                <BiChevronUp className='text-base' />
+                                            ) : (
+                                                <BiChevronDown className='text-base' />
+                                            )}
+                                        </button>
+                                    </div>
+                                )}
+                                {/* Detailed translations section */}
+                                {(windowType !== '[SELECTION_TRANSLATE]' || showDetailedTranslations) && result['pronunciations'] &&
                                     result['pronunciations'].map((pronunciation) => {
                                         return (
                                             <div key={nanoid()} className='mb-2'>
@@ -701,7 +722,7 @@ export default function TargetArea(props) {
                                             </div>
                                         );
                                     })}
-                                {result['explanations'] &&
+                                {(windowType !== '[SELECTION_TRANSLATE]' || showDetailedTranslations) && result['explanations'] &&
                                     result['explanations'].map((explanations) => {
                                         return (
                                             <div key={nanoid()} className='mb-4'>
@@ -741,8 +762,8 @@ export default function TargetArea(props) {
                                             </div>
                                         );
                                     })}
-                                <br />
-                                {result['associations'] &&
+                                {(windowType !== '[SELECTION_TRANSLATE]' || showDetailedTranslations) && <br />}
+                                {(windowType !== '[SELECTION_TRANSLATE]' || showDetailedTranslations) && result['associations'] &&
                                     result['associations'].map((association) => {
                                         return (
                                             <div key={nanoid()}>
@@ -755,7 +776,7 @@ export default function TargetArea(props) {
                                             </div>
                                         );
                                     })}
-                                {result['sentence'] &&
+                                {(windowType !== '[SELECTION_TRANSLATE]' || showDetailedTranslations) && result['sentence'] &&
                                     result['sentence'].map((sentence, index) => {
                                         return (
                                             <div key={nanoid()}>

@@ -123,6 +123,7 @@
                 "remember_window_size": "Remember Window Size",
                 "close_on_blur": "Close window when focus lost",
                 "always_on_top": "Always on Top",
+                "fixed_providers": "Always Show Providers (Quick Translate)",
                 "hide_source": "Hide Source Area",
                 "hide_language": "Hide Language Area",
                 "hide_window": "Hide Translation Window",
@@ -459,7 +460,9 @@
             "retry": "Try again",
             "delete_newline": "Delete Newline",
             "translate_back": "Translation back to the original",
-            "loading": "Translating..."
+            "loading": "Translating...",
+            "show_other_translations": "View other translations",
+            "hide_other_translations": "Hide other translations"
         },
         "recognize": {
             "recognize": "Recognize",

@@ -8,6 +8,7 @@ import { AiFillCloseCircle } from 'react-icons/ai';
 import React, { useState, useEffect, useRef } from 'react';
 import { listen } from '@tauri-apps/api/event';
 import { BsPinFill } from 'react-icons/bs';
+import { IoMdCheckmark } from 'react-icons/io';
 
 import LanguageArea from './components/LanguageArea';
 import SourceArea, { windowTypeAtom } from './components/SourceArea';
@@ -71,6 +72,7 @@ export default function Translate() {
     const [alwaysOnTop] = useConfig('translate_always_on_top', false);
     const [windowPosition] = useConfig('translate_window_position', 'mouse');
     const [rememberWindowSize] = useConfig('translate_remember_window_size', false);
+    const [fixedProviders] = useConfig('selection_translate_fixed_providers', false);
     const [translateServiceInstanceList, setTranslateServiceInstanceList] = useConfig('translate_service_list', [
         'deepl',
         'bing',
@@ -87,6 +89,7 @@ export default function Translate() {
     const [pluginList, setPluginList] = useState(null);
     const [serviceInstanceConfigMap, setServiceInstanceConfigMap] = useState(null);
     const [headerButtons, setHeaderButtons] = useState(null);
+    const [selectedProviderIndex, setSelectedProviderIndex] = useState(0);
     const contentRef = useRef(null);
     const windowType = useAtomValue(windowTypeAtom);
     const reorder = (list, startIndex, endIndex) => {
@@ -101,6 +104,22 @@ export default function Translate() {
         const items = reorder(translateServiceInstanceList, result.source.index, result.destination.index);
         setTranslateServiceInstanceList(items);
     };
+    // Reset selected provider index if out of bounds or provider list changes
+    useEffect(() => {
+        if (translateServiceInstanceList && serviceInstanceConfigMap) {
+            const enabledProviders = translateServiceInstanceList.filter(key => {
+                const config = serviceInstanceConfigMap[key] ?? {};
+                return config['enable'] ?? true;
+            });
+
+            // If selected index is out of bounds or provider is disabled, reset to first enabled
+            if (selectedProviderIndex >= translateServiceInstanceList.length ||
+                !enabledProviders.includes(translateServiceInstanceList[selectedProviderIndex])) {
+                setSelectedProviderIndex(0);
+            }
+        }
+    }, [translateServiceInstanceList, serviceInstanceConfigMap]);
+
     // 是否自动关闭窗口
     useEffect(() => {
         if (closeOnBlur !== null && !closeOnBlur) {
@@ -532,60 +551,68 @@ export default function Translate() {
                     ) : (
                         // SELECTION/IMAGE mode: Tabs on hover (absolute positioned)
                         <div className='relative group'>
-                            {translateServiceInstanceList !== null &&
+                            <div className={
+                                translateServiceInstanceList !== null &&
                                 serviceInstanceConfigMap !== null &&
-                                translateServiceInstanceList.map((serviceInstanceKey, index) => {
-                                    const config = serviceInstanceConfigMap[serviceInstanceKey] ?? {};
-                                    const enable = config['enable'] ?? true;
+                                translateServiceInstanceList.filter(key => {
+                                    const config = serviceInstanceConfigMap[key] ?? {};
+                                    return config['enable'] ?? true;
+                                }).length > 1
+                                    ? 'pb-14'
+                                    : ''
+                            }>
+                                {translateServiceInstanceList !== null &&
+                                    serviceInstanceConfigMap !== null &&
+                                    translateServiceInstanceList.map((serviceInstanceKey, index) => {
+                                        const config = serviceInstanceConfigMap[serviceInstanceKey] ?? {};
+                                        const enable = config['enable'] ?? true;
 
-                                    // Only show the first enabled service
-                                    if (!enable || index !== 0) return null;
+                                        // Only show the selected service
+                                        if (!enable || index !== selectedProviderIndex) return null;
 
-                                    return (
-                                        <div key={serviceInstanceKey}>
-                                            <TargetArea
-                                                index={index}
-                                                name={serviceInstanceKey}
-                                                translateServiceInstanceList={translateServiceInstanceList}
-                                                pluginList={pluginList}
-                                                serviceInstanceConfigMap={serviceInstanceConfigMap}
-                                                setHeaderButtons={setHeaderButtons}
-                                            />
-                                        </div>
-                                    );
-                                })}
+                                        return (
+                                            <div key={serviceInstanceKey}>
+                                                <TargetArea
+                                                    index={index}
+                                                    name={serviceInstanceKey}
+                                                    translateServiceInstanceList={translateServiceInstanceList}
+                                                    pluginList={pluginList}
+                                                    serviceInstanceConfigMap={serviceInstanceConfigMap}
+                                                    setHeaderButtons={setHeaderButtons}
+                                                />
+                                            </div>
+                                        );
+                                    })}
+                            </div>
 
-                            {/* Provider Tabs - Show on hover */}
+                            {/* Provider Tabs - Show on hover or always (based on config) */}
                             {translateServiceInstanceList !== null &&
                                 serviceInstanceConfigMap !== null &&
                                 translateServiceInstanceList.filter(key => {
                                     const config = serviceInstanceConfigMap[key] ?? {};
                                     return config['enable'] ?? true;
                                 }).length > 1 && (
-                                    <div className='absolute bottom-0 left-0 right-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-gradient-to-t from-background via-background to-transparent pt-8 pb-1 px-2'>
-                                        <div className='flex gap-1 justify-center items-center bg-content2/80 backdrop-blur-sm rounded-lg p-1 border border-content3'>
+                                    <div className={`absolute bottom-0 left-0 right-0 ${fixedProviders ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} transition-opacity duration-200 bg-gradient-to-t from-background via-background to-transparent pt-1.5 pb-1 px-[10px]`}>
+                                        <div className='flex gap-1 justify-center items-center bg-content2/80 backdrop-blur-sm rounded-lg p-1 border border-content3 mx-[-2px]'>
                                             {translateServiceInstanceList.map((serviceInstanceKey, index) => {
                                                 const config = serviceInstanceConfigMap[serviceInstanceKey] ?? {};
                                                 const enable = config['enable'] ?? true;
                                                 if (!enable) return null;
 
-                                                const isActive = index === 0;
+                                                const isActive = index === selectedProviderIndex;
 
                                                 return (
                                                     <Button
                                                         key={serviceInstanceKey}
                                                         size='sm'
                                                         variant='light'
-                                                        className={`h-[28px] min-w-[32px] px-1.5 ${
+                                                        className={`relative h-[28px] min-w-[32px] px-1.5 ${
                                                             isActive
-                                                                ? 'border-2 border-primary shadow-sm'
+                                                                ? 'border-2 border-primary shadow-lg shadow-primary/50'
                                                                 : 'border-1 border-transparent hover:border-default-300'
                                                         }`}
                                                         onPress={() => {
-                                                            const items = Array.from(translateServiceInstanceList);
-                                                            const [removed] = items.splice(index, 1);
-                                                            items.unshift(removed);
-                                                            setTranslateServiceInstanceList(items);
+                                                            setSelectedProviderIndex(index);
                                                         }}
                                                     >
                                                         <img
@@ -597,6 +624,11 @@ export default function Translate() {
                                                             className='h-[18px] w-[18px]'
                                                             alt=''
                                                         />
+                                                        {isActive && (
+                                                            <div className='absolute -top-0.5 -right-0.5 bg-primary rounded-full w-3.5 h-3.5 flex items-center justify-center'>
+                                                                <IoMdCheckmark className='text-white text-[10px]' />
+                                                            </div>
+                                                        )}
                                                     </Button>
                                                 );
                                             })}
